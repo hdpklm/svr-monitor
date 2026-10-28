@@ -1,0 +1,30 @@
+CREATE TABLE clients (
+	id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	name VARCHAR(100) NOT NULL,
+	key_hash CHAR(64) NOT NULL,
+	active TINYINT(1) NOT NULL DEFAULT 1,
+	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	last_seen DATETIME NULL,
+	PRIMARY KEY (id),
+	UNIQUE KEY uq_clients_key_hash (key_hash)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE metrics (
+	client_id INT UNSIGNED NOT NULL,
+	name VARCHAR(128) NOT NULL,
+	ts DATETIME NOT NULL,
+	avg_value DOUBLE NOT NULL,
+	min_value DOUBLE NOT NULL,
+	max_value DOUBLE NOT NULL,
+	PRIMARY KEY (client_id, name, ts),
+	CONSTRAINT fk_metrics_client FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE slow_metrics (
+	client_id INT UNSIGNED NOT NULL,
+	name VARCHAR(128) NOT NULL,
+	ts DATETIME NOT NULL,
+	value DOUBLE NOT NULL,
+	PRIMARY KEY (client_id, name, ts),
+	CONSTRAINT fk_slow_metrics_client FOREIGN KEY (client_id) REFERENCES clients (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Dispositivos · Monitor{% endblock %}
+{% block content %}
+{% macro percent(value) %}{% if value is none %}—{% else %}{{ "%.0f"|format(value) }} %{% endif %}{% endmacro %}
+
+<div class="page-head">
+	<div>
+		<h1>Dispositivos</h1>
+		<p class="status">{{ devices|length }} de {{ max_devices }}</p>
+	</div>
+	<button class="btn btn-primary" type="button" id="add-device" {% if devices|length >= max_devices %}disabled{% endif %}>Añadir dispositivo</button>
+</div>
+
+{% if devices %}
+	<div class="table-wrap">
+		<table class="table">
+			<thead>
+				<tr>
+					<th scope="col">Dispositivo</th>
+					<th scope="col">Estado</th>
+					<th scope="col">Último envío</th>
+					<th scope="col" class="num">CPU</th>
+					<th scope="col" class="num">RAM</th>
+					<th scope="col" class="num">Disco</th>
+					<th scope="col">Clave</th>
+					<th scope="col"><span class="visually-hidden">Acciones</span></th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in devices %}
+					<tr data-id="{{ item.id }}" data-name="{{ item.name }}" data-description="{{ item.description or '' }}">
+						<td>
+							<strong>{{ item.name }}</strong>
+							{% if item.description %}<div class="sub">{{ item.description }}</div>{% endif %}
+						</td>
+						<td>
+							{% if item.online %}
+								<span class="badge badge-ok">En línea</span>
+							{% elif item.last_seen %}
+								<span class="badge badge-off">Sin conexión</span>
+							{% else %}
+								<span class="badge">Sin datos</span>
+							{% endif %}
+						</td>
+						<td><time data-epoch="{{ item.last_seen if item.last_seen else '' }}">—</time></td>
+						<td class="num">{{ percent(item.cpu) }}</td>
+						<td class="num">{{ percent(item.ram) }}</td>
+						<td class="num">{{ percent(item.disk) }}</td>
+						<td class="key">{% if item.key_hint %}···{{ item.key_hint }}{% else %}—{% endif %}</td>
+						<td class="actions">
+							<a class="btn btn-quiet" href="/metrics?device={{ item.id }}">Ver</a>
+							<button class="btn btn-quiet" type="button" data-action="edit">Editar</button>
+							<button class="btn btn-quiet btn-danger" type="button" data-action="delete">Eliminar</button>
+						</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% else %}
+	<section class="empty">
+		<h2>Aún no hay dispositivos</h2>
+		<p>Añade uno para generar su clave de acceso y empezar a recibir métricas.</p>
+	</section>
+{% endif %}
+
+<dialog id="device-dialog" aria-labelledby="device-title">
+	<form class="dialog-body" id="device-form">
+		<h2 id="device-title">Añadir dispositivo</h2>
+		<label class="field">
+			<span>Nombre</span>
+			<input name="name" maxlength="100" required autocomplete="off">
+		</label>
+		<label class="field">
+			<span>Descripción</span>
+			<input name="description" maxlength="255" autocomplete="off">
+		</label>
+		<p class="form-error" id="device-error" role="alert" hidden></p>
+		<div class="dialog-actions">
+			<button class="btn" type="button" data-close>Cancelar</button>
+			<button class="btn btn-primary" type="submit" id="device-submit">Crear dispositivo</button>
+		</div>
+	</form>
+</dialog>
+
+<dialog id="key-dialog" aria-labelledby="key-title">
+	<div class="dialog-body">
+		<h2 id="key-title">Clave del dispositivo</h2>
+		<p>Cópiala ahora. No se volverá a mostrar.</p>
+		<div class="copy-row">
+			<textarea id="key-value" readonly rows="3" aria-label="Clave del dispositivo"></textarea>
+			<button class="btn" type="button" data-copy="key-value">Copiar</button>
+		</div>
+		<p class="field-label">URL del endpoint</p>
+		<div class="copy-row">
+			<input id="url-value" readonly value="{{ api_url }}" aria-label="URL del endpoint">
+			<button class="btn" type="button" data-copy="url-value">Copiar</button>
+		</div>
+		<p class="hint">En el servidor ejecuta <code>sudo bash setup.sh</code> y pega estos dos datos cuando los pida.</p>
+		<div class="dialog-actions">
+			<button class="btn btn-primary" type="button" id="key-done">Hecho</button>
+		</div>
+	</div>
+</dialog>
+{% endblock %}
+{% block scripts %}
+	<script type="module" src="{{ asset('js/devices.js') }}"></script>
+{% endblock %}

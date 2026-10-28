@@ -1,0 +1,9 @@
+.env
+.git
+venv
+.venv
+__pycache__
+*.pyc
+README.md
+schema.sql
+Dockerfile

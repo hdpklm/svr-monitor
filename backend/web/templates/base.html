@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light dark">
+	<title>{% block title %}Monitor{% endblock %}</title>
+	<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M1 13h6l3-9 4 17 3-8h6' fill='none' stroke='%232a78d6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+	<link rel="stylesheet" href="{{ asset('css/app.css') }}">
+</head>
+<body>
+	{% set path = request.url.path %}
+	<header class="topbar">
+		<a class="brand" href="/">
+			{% include "_mark.html" %}
+			<span>monitor</span>
+		</a>
+		<nav class="nav" aria-label="Principal">
+			{% if user %}
+				<a href="/metrics" {% if path.startswith("/metrics") %}aria-current="page"{% endif %}>Métricas</a>
+				<a href="/devices" {% if path.startswith("/devices") %}aria-current="page"{% endif %}>Dispositivos</a>
+			{% endif %}
+			<a href="/thanks" {% if path == "/thanks" %}aria-current="page"{% endif %}>Gracias</a>
+		</nav>
+		<div class="account">
+			{% if user %}
+				<span class="account-name">{{ user.name }}</span>
+				<form method="post" action="/logout">
+					<button class="btn btn-quiet" type="submit">Salir</button>
+				</form>
+			{% else %}
+				<a class="btn btn-quiet" href="/login">Entrar</a>
+			{% endif %}
+		</div>
+	</header>
+	<main class="page">
+		{% block content %}{% endblock %}
+	</main>
+	{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,15 @@
+[Unit]
+Description=Server monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=monitor
+WorkingDirectory=/srv/monitor
+EnvironmentFile=/srv/monitor/.env
+ExecStart=/srv/monitor/venv/bin/python /srv/monitor/main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

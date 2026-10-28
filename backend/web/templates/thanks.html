@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Gracias · Monitor{% endblock %}
+{% block content %}
+<section class="thanks">
+	<h1>Gracias por usar Monitor</h1>
+	<p>Monitor es gratis. Si te resulta útil, una donación ayuda a pagar los servidores y a seguir mejorándolo.</p>
+	<div class="thanks-actions">
+		{% if donate_url %}
+			<a class="btn btn-primary" href="{{ donate_url }}" target="_blank" rel="noopener noreferrer">Hacer una donación</a>
+		{% else %}
+			<button class="btn btn-primary" type="button" disabled title="Las donaciones aún no están activadas">Hacer una donación</button>
+		{% endif %}
+		{% if user %}
+			<a class="btn" href="/metrics">Volver a las métricas</a>
+		{% endif %}
+	</div>
+</section>
+{% endblock %}
