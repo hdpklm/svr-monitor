@@ -16,11 +16,16 @@
 			<span>monitor</span>
 		</a>
 		<nav class="nav" aria-label="Principal">
-			{% if user %}
+			{% if user and user.is_active %}
 				<a href="/metrics" {% if path.startswith("/metrics") %}aria-current="page"{% endif %}>Métricas</a>
 				<a href="/devices" {% if path.startswith("/devices") %}aria-current="page"{% endif %}>Dispositivos</a>
+				{% if user.is_admin %}
+					<a href="/admin/users" {% if path.startswith("/admin") %}aria-current="page"{% endif %}>Usuarios</a>
+				{% endif %}
 			{% endif %}
-			<a href="/thanks" {% if path == "/thanks" %}aria-current="page"{% endif %}>Gracias</a>
+			{% if not user or user.is_active %}
+				<a href="/thanks" {% if path == "/thanks" %}aria-current="page"{% endif %}>Gracias</a>
+			{% endif %}
 		</nav>
 		<div class="account">
 			{% if user %}

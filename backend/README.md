@@ -15,6 +15,7 @@ Recibe las métricas del monitor, valida la clave del cliente y las guarda en My
 | `database.py` | Pool de conexiones |
 | `config.py` | Variables de entorno |
 | `create_client.py` | Crea un cliente y su clave |
+| `scripts/db_migration.py` | Sincronización automática de tablas y columnas en MySQL |
 | `schema.sql` | Tablas |
 | `Dockerfile` | Imagen del backend |
 

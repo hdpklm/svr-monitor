@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Usuarios · Monitor{% endblock %}
+{% block content %}
+<div class="page-head">
+	<div>
+		<h1>Gestión de usuarios</h1>
+		<p class="status">{{ users_list|length }} registrados</p>
+	</div>
+</div>
+
+<div class="table-wrap">
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">ID</th>
+				<th scope="col">Usuario</th>
+				<th scope="col">Email</th>
+				<th scope="col">Estado</th>
+				<th scope="col">Rol</th>
+				<th scope="col">Último acceso</th>
+				<th scope="col" class="actions"><span class="visually-hidden">Acciones</span></th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for item in users_list %}
+				<tr>
+					<td>{{ item.id }}</td>
+					<td><strong>{{ item.name }}</strong></td>
+					<td>{{ item.email }}</td>
+					<td>
+						{% if item.is_active %}
+							<span class="badge badge-ok">Activo</span>
+						{% else %}
+							<span class="badge badge-off">Pendiente</span>
+						{% endif %}
+					</td>
+					<td>
+						{% if item.is_admin %}
+							<span class="badge badge-ok">Administrador</span>
+						{% else %}
+							<span class="badge">Usuario</span>
+						{% endif %}
+					</td>
+					<td><time>{{ item.last_login }}</time></td>
+					<td class="actions">
+						<div style="display: inline-flex; gap: 8px; justify-content: flex-end;">
+							{% if not item.is_active %}
+								<form method="post" action="/admin/users/{{ item.id }}/activate" style="margin: 0;">
+									<button class="btn btn-primary" type="submit">Aceptar</button>
+								</form>
+							{% elif item.id != user.id %}
+								<form method="post" action="/admin/users/{{ item.id }}/deactivate" style="margin: 0;">
+									<button class="btn btn-danger" type="submit">Desactivar</button>
+								</form>
+							{% endif %}
+							{% if item.id != user.id %}
+								<form method="post" action="/admin/users/{{ item.id }}/toggle-admin" style="margin: 0;">
+									<button class="btn btn-quiet" type="submit">
+										{% if item.is_admin %}Quitar admin{% else %}Hacer admin{% endif %}
+									</button>
+								</form>
+							{% endif %}
+						</div>
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}
+

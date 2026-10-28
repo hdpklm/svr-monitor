@@ -2,8 +2,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from main import app
-from web import settings
-from web import routes_auth, routes_devices, routes_metrics, routes_pages
+from web import routes_admin, routes_auth, routes_devices, routes_metrics, routes_pages, settings
 
 app.add_middleware(
 	SessionMiddleware,
@@ -14,5 +13,5 @@ app.add_middleware(
 )
 app.mount("/static", StaticFiles(directory=settings.STATIC_DIR), name="static")
 
-for module in (routes_auth, routes_pages, routes_metrics, routes_devices):
+for module in (routes_auth, routes_pages, routes_metrics, routes_devices, routes_admin):
 	app.include_router(module.router)

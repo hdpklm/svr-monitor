@@ -8,6 +8,7 @@ COPY requirements.txt .
 RUN uv pip install --system --no-cache -r requirements.txt
 
 COPY *.py ./
+COPY scripts ./scripts
 
 RUN useradd --system --no-create-home app
 USER app

@@ -7,11 +7,16 @@ import repository
 import transform
 from auth import authenticate
 from schemas import Payload
+from scripts.db_migration import sync_db
 
 
 @asynccontextmanager
 async def lifespan(app):
 	await database.open_pool()
+	try:
+		await sync_db()
+	except Exception as e:
+		print(f"Aviso durante sincronización de base de datos en arranque: {e}")
 	yield
 	await database.close_pool()
 

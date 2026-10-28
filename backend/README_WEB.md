@@ -7,8 +7,10 @@ Páginas servidas por FastAPI con Jinja2. Sin React ni CDN: Chart.js va incluido
 | Ruta | Contenido |
 |---|---|
 | `/login` | Entrar con Google |
+| `/pending` | Pantalla de espera para usuarios inactivos ("Please wait for an administrator to accept your account") |
 | `/metrics` | Dispositivo, periodo, muestra cada (1 min a 6 h) y gráficas |
 | `/devices` | Lista, añadir, editar y eliminar dispositivos |
+| `/admin/users` | Panel de administración para aprobar o desactivar usuarios y gestionar roles |
 | `/thanks` | Agradecimiento y botón de donación |
 
 ## Archivos nuevos
@@ -46,6 +48,7 @@ Añade al `.env` de la raíz (hay una plantilla en `.env.web.example`):
 | `SESSION_SECRET` | Clave larga y aleatoria |
 | `DONATE_URL` | Enlace de donación (PayPal, Ko-fi, Stripe...) |
 | `MAX_DEVICES` | Dispositivos por usuario (10 por defecto) |
+| `ADMIN_EMAILS` | Lista separada por comas de correos con rol de administrador y activación inmediata |
 
 Generar `SESSION_SECRET`:
 ```bash
@@ -60,10 +63,10 @@ python3 -c "import secrets; print(secrets.token_urlsafe(48))"
 docker compose up -d --build
 ```
 
-En una base de datos nueva, MySQL crea las tablas nuevas solo. Si ya tenías la base de datos creada, aplica el SQL una vez:
+En una base de datos nueva o existente, las tablas y columnas nuevas se crean solas al arrancar el backend mediante `scripts/db_migration.py`. También puedes ejecutar la sincronización manualmente en cualquier momento:
 
 ```bash
-docker compose exec -T db sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"' < backend/schema_web.sql
+docker compose exec backend python scripts/db_migration.py
 ```
 
 ## Arrancar sin Docker

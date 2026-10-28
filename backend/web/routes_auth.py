@@ -16,6 +16,8 @@ LOGIN_ERROR_URL = "/login?error=1"
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request, error: int = 0, user=Depends(current_user)):
 	if user:
+		if not user.get("is_active"):
+			return RedirectResponse("/pending", status_code=303)
 		return RedirectResponse("/metrics", status_code=303)
 	return templates.TemplateResponse(request, "login.html", {"user": None, "error": bool(error)})
 
@@ -38,10 +40,13 @@ async def finish_google(request: Request):
 
 	email = info["email"][:255]
 	name = (info.get("name") or email)[:255]
-	user_id = await repo_users.upsert_google(info["sub"], email, name)
+	is_admin_candidate = email.lower() in settings.ADMIN_EMAILS
+	user_id, is_active, _ = await repo_users.upsert_google(info["sub"], email, name, is_admin_email=is_admin_candidate)
 
 	request.session.clear()
 	request.session["user_id"] = user_id
+	if not is_active:
+		return RedirectResponse("/pending", status_code=303)
 	return RedirectResponse("/metrics", status_code=303)
 
 
