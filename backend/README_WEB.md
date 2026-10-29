@@ -57,10 +57,23 @@ python3 -c "import secrets; print(secrets.token_urlsafe(48))"
 
 ## Arrancar con Docker
 
+### Modo con MySQL propio
 `docker-compose.override.yml` se aplica solo junto a `docker-compose.yml`:
 
 ```bash
 docker compose up -d --build
+```
+
+### Modo con MySQL existente en el VPS (`mysql-monitor`)
+Si ya tienes un contenedor MySQL llamado `mysql-monitor` y solo deseas levantar el backend (`vps-monitor`):
+
+```bash
+# 1. En .env configura: DB_HOST=mysql-monitor
+# 2. Levanta vps-monitor:
+docker compose -f docker-compose.no-db.yml up -d --build
+
+# 3. Conecta ambos contenedores a la misma red:
+docker network connect <red_de_mysql> vps-monitor
 ```
 
 En una base de datos nueva o existente, las tablas y columnas nuevas se crean solas al arrancar el backend mediante `scripts/db_migration.py`. También puedes ejecutar la sincronización manualmente en cualquier momento:

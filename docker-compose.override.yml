@@ -1,12 +1,21 @@
 services:
-  db:
+  mysql:
+    container_name: mysql-monitor
     volumes:
-      - ./backend/schema_web.sql:/docker-entrypoint-initdb.d/zz_schema_web.sql:ro
+      - type: bind
+        source: ./backend/schema_web.sql
+        target: /docker-entrypoint-initdb.d/zz_schema_web.sql
+        read_only: true
 
   backend:
+    container_name: vps-monitor
     build:
       context: ./backend
       dockerfile: Dockerfile.web
+    volumes:
+      - type: bind
+        source: ./backend
+        target: /app
     environment:
       BASE_URL: ${BASE_URL}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}

@@ -1,5 +1,6 @@
 services:
-  db:
+  mysql:
+    container_name: mysql-monitor
     image: mysql:8.4
     restart: unless-stopped
     environment:
@@ -8,8 +9,13 @@ services:
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - db_data:/var/lib/mysql
-      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+      - type: bind
+        source: ${MYSQL_STORAGE:-/docker/storage}
+        target: /var/lib/mysql
+      - type: bind
+        source: ./backend/schema.sql
+        target: /docker-entrypoint-initdb.d/schema.sql
+        read_only: true
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
       interval: 10s
@@ -17,19 +23,21 @@ services:
       retries: 12
 
   backend:
+    container_name: vps-monitor
     build: ./backend
     restart: unless-stopped
     depends_on:
-      db:
+      mysql:
         condition: service_healthy
+    volumes:
+      - type: bind
+        source: ./backend
+        target: /app
     environment:
-      DB_HOST: db
-      DB_PORT: 3306
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
     ports:
       - "127.0.0.1:8000:8000"
-
-volumes:
-  db_data:

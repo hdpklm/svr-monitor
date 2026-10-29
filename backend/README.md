@@ -28,6 +28,8 @@ Recibe las métricas del monitor, valida la clave del cliente y las guarda en My
 
 ## Instalación con Docker
 
+### Modo con MySQL incluido
+
 `docker-compose.yml` y `.env.example` están en la raíz del proyecto, junto a las carpetas `backend` y `monitor`. Ejecuta todo desde la raíz.
 
 **1. Variables**
@@ -43,6 +45,33 @@ docker compose up -d --build
 ```
 
 La primera vez MySQL crea la base de datos y ejecuta `schema.sql`. Si cambias `schema.sql` después, no se vuelve a ejecutar mientras exista el volumen `db_data`.
+
+### Modo sin DB (conectar a MySQL existente `mysql-monitor`)
+
+Si ya tienes un contenedor MySQL en tu VPS llamado `mysql-monitor` y solo quieres arrancar el backend (`vps-monitor`):
+
+**1. Configurar `.env`**
+```ini
+DB_HOST=mysql-monitor
+DB_PORT=3306
+DB_NAME=monitor
+DB_USER=tu_usuario
+DB_PASSWORD=tu_password
+```
+
+**2. Arrancar el backend `vps-monitor`**
+```bash
+docker compose -f docker-compose.no-db.yml up -d --build
+```
+
+**3. Conectar a la red Docker de `mysql-monitor`**
+Para que `vps-monitor` se comunique con `mysql-monitor`:
+```bash
+# Conectar a la red donde se encuentra mysql-monitor:
+docker network connect <nombre_red_mysql> vps-monitor
+```
+
+Al iniciar, `vps-monitor` ejecutará automáticamente `scripts/db_migration.py` en `mysql-monitor`, creando las tablas necesarias sin requerir scripts manuales.
 
 **3. Crear un cliente**
 ```bash

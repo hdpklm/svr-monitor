@@ -1,0 +1,28 @@
+services:
+  backend:
+    container_name: vps-monitor
+    build:
+      context: ./backend
+      dockerfile: ${DOCKERFILE:-Dockerfile.web}
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ./backend
+        target: /app
+    environment:
+      DB_HOST: ${DB_HOST:-mysql-monitor}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      BASE_URL: ${BASE_URL:-http://localhost:8000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      SESSION_SECRET: ${SESSION_SECRET:-cambiar_por_clave_segura}
+      DONATE_URL: ${DONATE_URL:-}
+      MAX_DEVICES: ${MAX_DEVICES:-10}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+    ports:
+      - "127.0.0.1:8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

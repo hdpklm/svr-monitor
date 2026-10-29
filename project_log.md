@@ -25,3 +25,25 @@
 	- Se integró `sync_db()` en el `lifespan` de FastAPI en `main.py` para ejecutarse automáticamente al arrancar el servidor backend.
 	- Se actualizaron los `Dockerfile` y `Dockerfile.web` para incluir el directorio `scripts/`.
 	- Se añadió test unitario de verificación en `LLM_Test/gemini/database/test_migration.py`.
+
+### 📝 Registro: [v1.3.0] - Soporte y documentación para despliegue con MySQL existente en VPS
+- **date-time**: 2026-10-29 15:49:00
+- **Problema**:
+	- Se necesitaba poder arrancar únicamente el contenedor del backend (nombrado `vps-monitor`) contra un contenedor de MySQL ya existente en el VPS (nombrado `mysql-monitor`), sin forzar la creación ni el arranque del servicio `db` local.
+- **Causa**:
+	- `docker-compose.yml` mantenía una dependencia fija `depends_on: db` y `DB_HOST: db` cableado a nivel de servicio.
+- **Solución**:
+	- Se configuró `container_name: vps-monitor` y `DB_HOST: ${DB_HOST:-db}` en `docker-compose.yml`.
+	- Se creó `docker-compose.no-db.yml` optimizado para arrancar exclusivamente el servicio `vps-monitor`.
+	- Se redactó `README.md` y se actualizó `backend/README_WEB.md` documentando el proceso completo de configuración de red, variables `.env` y ejecución desatendida de migraciones automáticas.
+
+### 📝 Registro: [v1.4.0] - Corrección de nombres de servicios en compose y migración a bind mounts
+- **date-time**: 2026-10-29 16:01:00
+- **Problema**:
+	- Se renombró el servicio `db` a `mysql` en `docker-compose.yml`, pero `DB_HOST` mantenía el fallback `db`, y `docker-compose.override.yml` seguía apuntando a `services.db`, provocando inconsistencias al sobreescribir la configuración. Además, se requerían bind mounts para persistir MySQL en `/docker/storage` y permitir modificar código del backend en caliente sin reconstruir la imagen.
+- **Causa**:
+	- Renombrado parcial de servicios y persistencia previa mediante volúmenes anónimos/nombrados de Docker (`db_data`).
+- **Solución**:
+	- Se actualizó el fallback de `DB_HOST` a `mysql` en `docker-compose.yml`.
+	- Se sincronizó `services.mysql:` en `docker-compose.override.yml`.
+	- Se reemplazaron los volúmenes nombrados por bind mounts explícitos (`type: bind`) para la base de datos hacia `/docker/storage` (configurable vía `MYSQL_STORAGE`) y para el backend hacia `./backend:/app` en todos los archivos de compose.
