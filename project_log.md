@@ -99,3 +99,13 @@
 	- Aunque `monitor/setup.sh` ya incluía la lógica interna `prepare_source()` para descargar y limpiar el repositorio por su cuenta, `devices.js` seguía generando la cadena de `git clone`.
 - **Solución**:
 	- Se actualizó `backend/web/static/js/devices.js` y `README.md` para generar únicamente `curl -fsSL https://raw.githubusercontent.com/hdpklm/svr-monitor/main/monitor/setup.sh | sudo bash -s -- "<URL>" "<KEY>"`.
+
+### 📝 Registro: [v1.7.2] - Indicadores de progreso y porcentaje en setup.sh
+- **date-time**: 2026-11-02 21:27:00
+- **Problema**:
+	- Al ejecutar `setup.sh` en dispositivos lentos como Raspberry Pi (`aarch64`), la consola quedaba congelada tras `downloading uv...` sin mostrar porcentaje ni progreso de creación del entorno virtual o instalación de paquetes.
+- **Causa**:
+	- El instalador de `uv` ejecutaba `curl -sSfL` en modo silencioso y los comandos `uv venv` y `uv pip install` tenían el flag `--quiet` activado.
+- **Solución**:
+	- Se añadieron indicadores de paso con porcentaje (`[1/6] (15%)` a `[6/6] (100%)`) en `monitor/setup.sh`.
+	- Se habilitó `--progress-bar` en la descarga de `uv` y del repositorio, y se eliminaron los flags `--quiet` de `git clone`, `uv venv` y `uv pip install` para mostrar barras de progreso reales en consola.

@@ -22,6 +22,10 @@ fail() {
 	exit 1
 }
 
+step() {
+	echo "==> $1"
+}
+
 require_root() {
 	[[ $EUID -eq 0 ]] || fail "ejecuta con sudo: sudo bash $0"
 }
@@ -33,6 +37,7 @@ require_commands() {
 }
 
 prepare_source() {
+	step "[1/6] (15%) Obteniendo archivos del monitor..."
 	local script_dir=""
 	if [[ -n ${BASH_SOURCE[0]:-} && -f ${BASH_SOURCE[0]} ]]; then
 		script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -45,21 +50,26 @@ prepare_source() {
 
 	TMP_DIR="$(mktemp -d)"
 	if command -v git >/dev/null; then
-		git clone --depth 1 --quiet "$REPO_URL" "$TMP_DIR/repo"
+		git clone --depth 1 --progress "$REPO_URL" "$TMP_DIR/repo"
 		SOURCE_DIR="$TMP_DIR/repo/monitor"
 	else
 		mkdir -p "$TMP_DIR/repo"
-		curl -fsSL "$REPO_TARBALL" | tar -xz -C "$TMP_DIR/repo" --strip-components=1
+		curl --progress-bar -fL "$REPO_TARBALL" | tar -xz -C "$TMP_DIR/repo" --strip-components=1
 		SOURCE_DIR="$TMP_DIR/repo/monitor"
 	fi
 }
 
 install_uv() {
-	command -v uv >/dev/null && return
-	curl -LsSf https://astral.sh/uv/install.sh | UV_UNMANAGED_INSTALL=/usr/local/bin sh
+	step "[2/6] (35%) Verificando e instalando uv..."
+	if command -v uv >/dev/null; then
+		echo "uv ya está instalado: $(command -v uv)"
+		return
+	fi
+	curl -LsSf https://astral.sh/uv/install.sh | sed 's/-sSfL/--progress-bar -fL/g' | UV_UNMANAGED_INSTALL=/usr/local/bin sh
 }
 
 create_user() {
+	step "[3/6] (50%) Configurando usuario y copiando archivos..."
 	id "$SERVICE_USER" &>/dev/null && return
 	useradd --system --no-create-home --shell /usr/sbin/nologin "$SERVICE_USER"
 }
@@ -73,8 +83,9 @@ copy_files() {
 }
 
 create_venv() {
-	uv venv --allow-existing --quiet "$INSTALL_DIR/venv"
-	uv pip install --quiet --python "$INSTALL_DIR/venv/bin/python" -r "$INSTALL_DIR/requirements.txt"
+	step "[4/6] (70%) Creando entorno virtual e instalando dependencias Python..."
+	uv venv --allow-existing "$INSTALL_DIR/venv"
+	uv pip install --python "$INSTALL_DIR/venv/bin/python" -r "$INSTALL_DIR/requirements.txt"
 }
 
 write_env() {
@@ -111,6 +122,7 @@ write_env() {
 }
 
 install_service() {
+	step "[5/6] (90%) Registrando e iniciando el servicio systemd..."
 	install -m 644 "$SOURCE_DIR/monitor.service" "/etc/systemd/system/$SERVICE_NAME.service"
 	systemctl daemon-reload
 	systemctl enable "$SERVICE_NAME"
@@ -118,10 +130,11 @@ install_service() {
 }
 
 verify_service() {
+	step "[6/6] (100%) Comprobando estado del servicio..."
 	sleep 2
 	if systemctl is-active --quiet "$SERVICE_NAME"; then
-		echo "servicio activo"
-		echo "logs: journalctl -u $SERVICE_NAME -f"
+		echo "✓ Servicio activo y funcionando"
+		echo "  Ver logs en vivo: journalctl -u $SERVICE_NAME -f"
 		return
 	fi
 	journalctl -u "$SERVICE_NAME" -n 20 --no-pager >&2
