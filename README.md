@@ -228,27 +228,11 @@ Tienes dos formas de obtener la clave `mk_...`:
 
 ### Paso 2: Instalar el servicio en el VPS cliente
 
-En cada servidor o VPS que quieras monitorizar:
+En cada servidor o VPS que quieras monitorizar, ejecuta directamente el comando que te entrega el panel web:
 
-1. **Copia la carpeta `monitor/` a ese servidor** (vía SCP, rsync o clonando el repo):
-   ```bash
-   # Ejemplo usando scp desde tu máquina:
-   scp -r monitor/ usuario@ip-del-vps:~/monitor
-   ```
-
-2. **Entra en el servidor y ejecuta el instalador `setup.sh` con `sudo`:**
-
-   **Modo con parámetros directos:**
-   ```bash
-   cd ~/monitor
-   sudo bash setup.sh https://monitor.tudominio.com/api/metrics <TU_API_KEY_MK> "Nombre-Servidor"
-   ```
-
-   **Modo interactivo (te pedirá la URL y la clave):**
-   ```bash
-   cd ~/monitor
-   sudo bash setup.sh
-   ```
+```bash
+curl -fsSL https://raw.githubusercontent.com/hdpklm/svr-monitor/main/monitor/setup.sh | sudo bash -s -- "https://monitor.tudominio.com/api/metrics" "<TU_API_KEY_MK>"
+```
 
 #### ¿Qué hace el instalador automáticamente?
 - Instala el gestor rápido de Python `uv` si no está en el sistema.

@@ -1,11 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+REPO_URL="https://github.com/hdpklm/svr-monitor.git"
+REPO_TARBALL="https://github.com/hdpklm/svr-monitor/archive/refs/heads/main.tar.gz"
 INSTALL_DIR="/srv/monitor"
 SERVICE_NAME="monitor"
 SERVICE_USER="monitor"
-SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_DIR=""
+TMP_DIR=""
 APP_FILES=(main.py config.py collector.py aggregator.py sender.py requirements.txt)
+
+cleanup() {
+	if [[ -n $TMP_DIR && -d $TMP_DIR ]]; then
+		rm -rf "$TMP_DIR"
+	fi
+}
+trap cleanup EXIT
 
 fail() {
 	echo "error: $1" >&2
@@ -20,6 +30,28 @@ require_commands() {
 	for name in curl systemctl; do
 		command -v "$name" >/dev/null || fail "falta el comando $name"
 	done
+}
+
+prepare_source() {
+	local script_dir=""
+	if [[ -n ${BASH_SOURCE[0]:-} && -f ${BASH_SOURCE[0]} ]]; then
+		script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+	fi
+
+	if [[ -n $script_dir && -f "$script_dir/main.py" ]]; then
+		SOURCE_DIR="$script_dir"
+		return
+	fi
+
+	TMP_DIR="$(mktemp -d)"
+	if command -v git >/dev/null; then
+		git clone --depth 1 --quiet "$REPO_URL" "$TMP_DIR/repo"
+		SOURCE_DIR="$TMP_DIR/repo/monitor"
+	else
+		mkdir -p "$TMP_DIR/repo"
+		curl -fsSL "$REPO_TARBALL" | tar -xz -C "$TMP_DIR/repo" --strip-components=1
+		SOURCE_DIR="$TMP_DIR/repo/monitor"
+	fi
 }
 
 install_uv() {
@@ -99,6 +131,7 @@ verify_service() {
 main() {
 	require_root
 	require_commands
+	prepare_source
 	install_uv
 	create_user
 	copy_files

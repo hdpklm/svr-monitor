@@ -80,3 +80,22 @@
 	- Se actualizó `backend/Dockerfile` para incluir `requirements-web.txt`, copiar `web/` y arrancar `app:app`.
 	- Se añadió `DEBUG=true` al archivo `.env`.
 	- Se reconstruyó y reinició el contenedor `vps-monitor`, verificando respuestas 200 OK en `/login` y redirección 303 con sesión activa en `/auth/debug`.
+
+### 📝 Registro: [v1.7.0] - Comando único de instalación del agente desde GitHub
+- **date-time**: 2026-11-02 20:38:00
+- **Problema**:
+	- Al crear un nuevo dispositivo en el panel web, se mostraban dos campos separados (clave y URL del endpoint) obligando al usuario a copiar manualmente el código fuente y pegar cada valor por separado en el servidor remoto.
+- **Causa**:
+	- El diálogo `#key-dialog` en `devices.html` y `devices.js` no generaba un comando unificado de instalación ni `setup.sh` descargaba el repositorio automáticamente si se ejecutaba en solitario.
+- **Solución**:
+	- Se actualizó `backend/web/templates/devices.html` y `backend/web/static/js/devices.js` para mostrar una única línea de comando lista para copiar que descarga el repositorio desde `https://github.com/hdpklm/svr-monitor.git` y ejecuta `setup.sh` pasándole la URL y la clave.
+	- Se mejoró `monitor/setup.sh` con `prepare_source()` para descargar automáticamente el código desde GitHub si se invoca directamente sin los archivos locales.
+
+### 📝 Registro: [v1.7.1] - Simplificación del comando de instalación estilo Tailscale (curl | bash)
+- **date-time**: 2026-11-02 20:56:00
+- **Problema**:
+	- El comando de instalación generado en el modal concatenaba múltiples comandos con `&&` (`rm`, `git clone`, `bash`, `rm`), en lugar de un único comando directo `curl | sudo bash`.
+- **Causa**:
+	- Aunque `monitor/setup.sh` ya incluía la lógica interna `prepare_source()` para descargar y limpiar el repositorio por su cuenta, `devices.js` seguía generando la cadena de `git clone`.
+- **Solución**:
+	- Se actualizó `backend/web/static/js/devices.js` y `README.md` para generar únicamente `curl -fsSL https://raw.githubusercontent.com/hdpklm/svr-monitor/main/monitor/setup.sh | sudo bash -s -- "<URL>" "<KEY>"`.

@@ -46,8 +46,10 @@ async function submitForm(event) {
 	try {
 		if (state.editingId === null) {
 			const created = await sendJson("POST", "/devices", readForm());
+			const apiUrl = elements.keyDialog.dataset.apiUrl || `${location.origin}/api/metrics`;
+			const setupUrl = "https://raw.githubusercontent.com/hdpklm/svr-monitor/main/monitor/setup.sh";
 			elements.dialog.close();
-			elements.keyValue.value = created.key;
+			elements.keyValue.value = `curl -fsSL ${setupUrl} | sudo bash -s -- "${apiUrl}" "${created.key}"`;
 			elements.keyDialog.showModal();
 		} else {
 			await sendJson("PUT", `/devices/${state.editingId}`, readForm());
