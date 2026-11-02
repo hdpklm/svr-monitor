@@ -50,4 +50,4 @@ services:
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
       DEBUG: ${DEBUG:-false}
     ports:
-      - "127.0.0.1:8000:8000"
+      - "8000:8000"

@@ -109,3 +109,14 @@
 - **Solución**:
 	- Se añadieron indicadores de paso con porcentaje (`[1/6] (15%)` a `[6/6] (100%)`) en `monitor/setup.sh`.
 	- Se habilitó `--progress-bar` en la descarga de `uv` y del repositorio, y se eliminaron los flags `--quiet` de `git clone`, `uv venv` y `uv pip install` para mostrar barras de progreso reales en consola.
+
+### 📝 Registro: [v1.7.3] - Exposición del puerto 8000 en todas las interfaces de red (0.0.0.0)
+- **date-time**: 2026-11-02 22:06:00
+- **Problema**:
+	- El agente desde la Raspberry Pi daba `ConnectTimeoutError` al intentar enviar métricas a la IP de Tailscale/LAN (`100.100.1.235:8000`).
+- **Causa**:
+	- En `docker-compose.yml` y `docker-compose.no-db.yml` el puerto estaba mapeado exclusivamente a loopback (`"127.0.0.1:8000:8000"`), impidiendo conexiones entrantes desde la interfaz de Tailscale o red local.
+- **Solución**:
+	- Se actualizó el mapeo de puertos a `"8000:8000"` (`0.0.0.0:8000`) en `docker-compose.yml` y `docker-compose.no-db.yml`.
+	- Se ajustó `devices.js` para usar `location.origin` cuando `BASE_URL` sea el valor por defecto `localhost`.
+	- Se recreó el contenedor `vps-monitor`, confirmando la recepción inmediata de las métricas en cola desde la Raspberry Pi (`POST /api/metrics 204 No Content`).
