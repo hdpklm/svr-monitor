@@ -6,20 +6,21 @@ import psutil
 import config
 
 MB = 1024 * 1024
+BOOT_TIME = psutil.boot_time()
 
 
 class FastCollector:
 	def __init__(self):
 		psutil.cpu_percent(interval=None)
-		self._net = psutil.net_io_counters()
-		self._disk = psutil.disk_io_counters()
+		self._net = psutil.net_io_counters(nowrap=False)
+		self._disk = psutil.disk_io_counters(nowrap=False)
 		self._last = time.monotonic()
 
 	def read(self):
 		now = time.monotonic()
 		dt = max(now - self._last, 1e-6)
-		net = psutil.net_io_counters()
-		disk = psutil.disk_io_counters()
+		net = psutil.net_io_counters(nowrap=False)
+		disk = psutil.disk_io_counters(nowrap=False)
 		mem = psutil.virtual_memory()
 
 		sample = {
@@ -42,7 +43,7 @@ def read_slow():
 		"load1": os.getloadavg()[0],
 		"swap_percent": psutil.swap_memory().percent,
 		"disk_used_percent": {path: psutil.disk_usage(path).percent for path in config.DISK_PATHS},
-		"uptime_s": int(time.time() - psutil.boot_time()),
+		"uptime_s": int(time.time() - BOOT_TIME),
 	}
 	temperature = _max_temperature()
 	if temperature is not None:

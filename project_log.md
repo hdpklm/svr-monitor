@@ -120,3 +120,13 @@
 	- Se actualizó el mapeo de puertos a `"8000:8000"` (`0.0.0.0:8000`) en `docker-compose.yml` y `docker-compose.no-db.yml`.
 	- Se ajustó `devices.js` para usar `location.origin` cuando `BASE_URL` sea el valor por defecto `localhost`.
 	- Se recreó el contenedor `vps-monitor`, confirmando la recepción inmediata de las métricas en cola desde la Raspberry Pi (`POST /api/metrics 204 No Content`).
+
+### 📝 Registro: [v1.7.4] - Optimización de consumo de CPU del agente monitor (de 20 Hz a 1 Hz)
+- **date-time**: 2026-11-02 22:31:00
+- **Problema**:
+	- El agente `monitor` consumía alrededor de un 2% de CPU en dispositivos como la Raspberry Pi.
+- **Causa**:
+	- `SAMPLE_HZ` estaba fijado en `20` (20 lecturas por segundo = 1.200 muestras por minuto), abriendo y parseando archivos de `/proc` y `/sys` 80 veces por segundo, además del bloqueo interno de caché `nowrap=True` en `psutil`.
+- **Solución**:
+	- Se redujo `SAMPLE_HZ` por defecto a `1` (1 muestra por segundo = 60 muestras por minuto, configurable vía `MONITOR_SAMPLE_HZ`) en `monitor/config.py`, reduciendo las lecturas en un 95% (20x menos).
+	- Se desactivó `nowrap=False` en `net_io_counters` y `disk_io_counters` y se cacheó `psutil.boot_time()` en `monitor/collector.py`.

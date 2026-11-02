@@ -5,7 +5,7 @@ SERVER_URL = os.environ.get("MONITOR_URL", "https://tu-servidor/api/metrics")
 API_KEY = os.environ.get("MONITOR_API_KEY", "")
 HOST_ID = os.environ.get("MONITOR_HOST", socket.gethostname())
 
-SAMPLE_HZ = 20
+SAMPLE_HZ = int(os.environ.get("MONITOR_SAMPLE_HZ", "1"))
 WINDOW_SECONDS = 60
 DISK_PATHS = ["/"]
 
