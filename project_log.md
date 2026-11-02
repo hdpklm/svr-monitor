@@ -140,3 +140,13 @@
 - **Solución**:
 	- Se creó `monitor/update.sh` que descarga la última versión del repositorio en un directorio temporal, actualiza los scripts Python (y el propio `update.sh`), sincroniza dependencias en el venv existente y reinicia el servicio `monitor`.
 	- Se actualizó `monitor/setup.sh` para copiar automáticamente `update.sh` con permisos de ejecución (`755`) en `/srv/monitor/update.sh`.
+
+### 📝 Registro: [v1.8.1] - Persistencia de filtros en localStorage y actualización automática cada minuto
+- **date-time**: 2026-11-02 22:57:00
+- **Problema**:
+	- Al recargar la página de métricas se perdían las selecciones de dispositivo, periodo ("Periodo"), intervalo de agregación ("Muestra cada") y casillas ("Mostrar"), volviendo siempre a los valores por defecto.
+- **Causa**:
+	- `backend/web/static/js/metrics.js` no guardaba ni restauraba el estado de los controles en `localStorage`.
+- **Solución**:
+	- Se implementaron `loadPrefs()` y `savePrefs()` en `backend/web/static/js/metrics.js` bajo la clave `monitor_metrics_prefs` para persistir y restaurar automáticamente `device`, `range`, `step` y `stats`.
+	- Se mantuvo el refresco automático cada 60 segundos (`setInterval(refresh, 60_000)`) añadiendo la hora exacta de última actualización en la barra de estado.
