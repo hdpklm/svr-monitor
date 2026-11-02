@@ -19,5 +19,13 @@
 		</svg>
 		<span>Continuar con Google</span>
 	</a>
+	{% if debug_mode %}
+		<div style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--line-strong);">
+			<p style="font-size: 13px; color: var(--ink-2); margin-bottom: 10px;">Modo de depuración activo:</p>
+			<a class="btn btn-primary" href="/auth/debug" style="width: 100%;">
+				Entrar como Admin (Debug sin Google)
+			</a>
+		</div>
+	{% endif %}
 </section>
 {% endblock %}

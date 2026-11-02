@@ -19,7 +19,23 @@ async def login_page(request: Request, error: int = 0, user=Depends(current_user
 		if not user.get("is_active"):
 			return RedirectResponse("/pending", status_code=303)
 		return RedirectResponse("/metrics", status_code=303)
-	return templates.TemplateResponse(request, "login.html", {"user": None, "error": bool(error)})
+	return templates.TemplateResponse(
+		request,
+		"login.html",
+		{"user": None, "error": bool(error), "debug_mode": settings.DEBUG},
+	)
+
+
+@router.get("/auth/debug")
+async def debug_login(request: Request):
+	if not settings.DEBUG:
+		return RedirectResponse("/login", status_code=303)
+	user_id, _, _ = await repo_users.upsert_google(
+		"debug-admin", "admin@debug.local", "Debug Admin", is_admin_email=True
+	)
+	request.session.clear()
+	request.session["user_id"] = user_id
+	return RedirectResponse("/metrics", status_code=303)
 
 
 @router.get("/auth/google")

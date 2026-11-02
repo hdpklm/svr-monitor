@@ -47,3 +47,36 @@
 	- Se actualizó el fallback de `DB_HOST` a `mysql` en `docker-compose.yml`.
 	- Se sincronizó `services.mysql:` en `docker-compose.override.yml`.
 	- Se reemplazaron los volúmenes nombrados por bind mounts explícitos (`type: bind`) para la base de datos hacia `/docker/storage` (configurable vía `MYSQL_STORAGE`) y para el backend hacia `./backend:/app` en todos los archivos de compose.
+
+### 📝 Registro: [v1.5.0] - Implementación de modo debug para login sin Google OAuth
+- **date-time**: 2026-11-02 19:37:00
+- **Problema**:
+	- Se necesitaba poder acceder al panel web y autenticarse en entornos locales o de desarrollo sin necesidad de configurar credenciales de Google OAuth.
+- **Causa**:
+	- El flujo de login requería obligatoriamente pasar por la pantalla de consentimiento y callback de Google OAuth, bloqueando el acceso a `/metrics` si no se disponía de un Client ID válido.
+- **Solución**:
+	- Se añadió el flag `DEBUG` a `web/settings.py` (activo si `DEBUG=true`).
+	- Se añadieron valores por defecto tolerantes a `settings.py` para variables web si no están definidas en `.env`.
+	- Se implementó la ruta `[GET] /auth/debug` en `web/routes_auth.py` para crear/iniciar sesión automáticamente como usuario administrador activo (`admin@debug.local`).
+	- Se incorporó en `web/templates/login.html` un botón visible cuando `debug_mode` esté habilitado para iniciar sesión sin Google.
+	- Se pasaron las variables de entorno en `docker-compose.override.yml` y `docker-compose.no-db.yml` y se documentó en `README.md`.
+
+### 📝 Registro: [v1.6.0] - Unificación de Dockerfile por defecto a Dockerfile.web en docker-compose
+- **date-time**: 2026-11-02 20:22:00
+- **Problema**:
+	- Al acceder a `/` o `/login` el servidor respondía con `404 Not Found`.
+- **Causa**:
+	- El contenedor `vps-monitor` se había construido con `Dockerfile` (`main:app`, la API base sin dependencias web como Jinja2 ni rutas web), en lugar de `Dockerfile.web` (`app:app`).
+- **Solución**:
+	- Se configuró `docker-compose.yml` para usar por defecto `dockerfile: ${DOCKERFILE:-Dockerfile.web}` e incluir las variables de entorno para el servidor web y modo debug.
+
+### 📝 Registro: [v1.6.1] - Unificación de Dockerfile y activación de DEBUG en .env
+- **date-time**: 2026-11-02 20:28:00
+- **Problema**:
+	- Tras recrear los contenedores sin `--build`, Docker seguía utilizando la imagen en caché `svr-monitor-backend` construida con el `Dockerfile` básico (`main:app`), y el archivo `.env` no incluía aún `DEBUG=true`.
+- **Causa**:
+	- Eliminar el contenedor no elimina la imagen en caché de Docker, y `Dockerfile` base no instalaba `requirements-web.txt` ni arrancaba `app:app`.
+- **Solución**:
+	- Se actualizó `backend/Dockerfile` para incluir `requirements-web.txt`, copiar `web/` y arrancar `app:app`.
+	- Se añadió `DEBUG=true` al archivo `.env`.
+	- Se reconstruyó y reinició el contenedor `vps-monitor`, verificando respuestas 200 OK en `/login` y redirección 303 con sesión activa en `/auth/debug`.

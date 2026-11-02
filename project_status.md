@@ -1,4 +1,4 @@
-# Project Status - Server Monitor v1.4.0
+# Project Status - Server Monitor v1.6.1
 
 ## Arquitectura: Arquitectura Hexagonal / HexArch
 Sistema de monitorización ligera de métricas de servidores y panel web de visualización multiusuario.
@@ -16,7 +16,7 @@ Sistema de monitorización ligera de métricas de servidores y panel web de visu
 - `db_migration::sync_db`: Sincronización automática de esquema MySQL (creación de tablas y columnas faltantes).
 
 ### `backend/web`
-- `routes_auth`: Control de flujo de inicio de sesión con Google OAuth y cierre de sesión.
+- `routes_auth`: Control de flujo de inicio de sesión con Google OAuth, sesión debug y cierre de sesión.
 - `routes_pages`: Vistas HTML principales del panel y pantalla de espera para usuarios pendientes.
 - `routes_devices`: Administración de dispositivos asociados al usuario autenticado.
 - `routes_metrics`: Consulta y visualización de series temporales de métricas.
@@ -32,7 +32,9 @@ Sistema de monitorización ligera de métricas de servidores y panel web de visu
 	- **Response**: `204 No Content`
 	- **Descripcion**: Recepción de métricas de agentes.
 - `[GET] /login` [Auth: Public]:
-	- **Descripcion**: Página de inicio de sesión con Google.
+	- **Descripcion**: Página de inicio de sesión con Google y botón debug si aplica.
+- `[GET] /auth/debug` [Auth: Public (Only if DEBUG=true)]:
+	- **Descripcion**: Inicio de sesión automático directo como Administrador activo en entornos locales de desarrollo.
 - `[GET] /auth/google` [Auth: Public]:
 	- **Descripcion**: Redirección hacia el proveedor OAuth de Google.
 - `[GET] /auth/google/callback` [Auth: Public]:

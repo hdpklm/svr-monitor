@@ -46,6 +46,16 @@ Permite entrar al panel web mediante Google OAuth para consultar gráficas inter
        `https://monitor.tudominio.com/auth/google/callback`
   4. Copia el **ID de cliente** y el **Secreto de cliente** a tu `.env`.
 
+#### 🛠️ Modo Debug (Panel Web sin credenciales de Google)
+Si estás probando el panel web en local o desarrollo y no tienes credenciales de Google configuradas:
+1. Añade en tu archivo `.env`:
+   ```ini
+   DEBUG=true
+   ```
+2. En la pantalla de login (`http://localhost:8000/login`) aparecerá un botón directo:
+   **"Entrar como Admin (Debug sin Google)"** (o accediendo directamente a `http://localhost:8000/auth/debug`).
+3. Te autenticará automáticamente como usuario administrador activo (`admin@debug.local`).
+
 ---
 
 ### Modo 2: Sin autenticación de Google (Modo privado / Solo API)

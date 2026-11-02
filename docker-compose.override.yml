@@ -17,10 +17,11 @@ services:
         source: ./backend
         target: /app
     environment:
-      BASE_URL: ${BASE_URL}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      SESSION_SECRET: ${SESSION_SECRET}
+      BASE_URL: ${BASE_URL:-http://localhost:8000}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      SESSION_SECRET: ${SESSION_SECRET:-super_secret_debug_key}
       DONATE_URL: ${DONATE_URL:-}
       MAX_DEVICES: ${MAX_DEVICES:-10}
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      DEBUG: ${DEBUG:-false}
