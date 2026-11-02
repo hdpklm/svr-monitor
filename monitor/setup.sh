@@ -80,6 +80,9 @@ copy_files() {
 		[[ -f $SOURCE_DIR/$file ]] || fail "falta $file junto a setup.sh"
 		install -m 644 "$SOURCE_DIR/$file" "$INSTALL_DIR/$file"
 	done
+	if [[ -f "$SOURCE_DIR/update.sh" ]]; then
+		install -m 755 "$SOURCE_DIR/update.sh" "$INSTALL_DIR/update.sh"
+	fi
 }
 
 create_venv() {

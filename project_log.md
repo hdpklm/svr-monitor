@@ -130,3 +130,13 @@
 - **Solución**:
 	- Se redujo `SAMPLE_HZ` por defecto a `1` (1 muestra por segundo = 60 muestras por minuto, configurable vía `MONITOR_SAMPLE_HZ`) en `monitor/config.py`, reduciendo las lecturas en un 95% (20x menos).
 	- Se desactivó `nowrap=False` en `net_io_counters` y `disk_io_counters` y se cacheó `psutil.boot_time()` en `monitor/collector.py`.
+
+### 📝 Registro: [v1.8.0] - Script de auto-actualización en /srv/monitor/update.sh
+- **date-time**: 2026-11-02 22:50:00
+- **Problema**:
+	- Se requería un script dedicado en `/srv/monitor/update.sh` para actualizar el agente monitor a la última versión de GitHub sin reinstalar el sistema ni tocar las credenciales `.env`.
+- **Causa**:
+	- Solo existía `setup.sh` orientado a la instalación inicial.
+- **Solución**:
+	- Se creó `monitor/update.sh` que descarga la última versión del repositorio en un directorio temporal, actualiza los scripts Python (y el propio `update.sh`), sincroniza dependencias en el venv existente y reinicia el servicio `monitor`.
+	- Se actualizó `monitor/setup.sh` para copiar automáticamente `update.sh` con permisos de ejecución (`755`) en `/srv/monitor/update.sh`.

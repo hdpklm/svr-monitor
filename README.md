@@ -244,8 +244,15 @@ curl -fsSL https://raw.githubusercontent.com/hdpklm/svr-monitor/main/monitor/set
 
 ---
 
-### Paso 3: Gestión del servicio systemd
+### Paso 3: Gestión y actualización del servicio
 
+#### Actualizar el agente a la última versión de GitHub (conserva tu clave actual)
+```bash
+sudo bash /srv/monitor/update.sh
+```
+*(Si instalaste una versión anterior que aún no tenía `update.sh`, descárgalo y ejecútalo con: `sudo curl -fsSL https://raw.githubusercontent.com/hdpklm/svr-monitor/main/monitor/update.sh -o /srv/monitor/update.sh && sudo chmod +x /srv/monitor/update.sh && sudo bash /srv/monitor/update.sh`).*
+
+#### Comandos de control de systemd
 El monitor queda corriendo de forma continua como un servicio de fondo que reinicia solo ante fallos o reinicios del VPS:
 
 ```bash

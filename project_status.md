@@ -1,4 +1,4 @@
-# Project Status - Server Monitor v1.7.4
+# Project Status - Server Monitor v1.8.0
 
 ## Arquitectura: Arquitectura Hexagonal / HexArch
 Sistema de monitorización ligera de métricas de servidores y panel web de visualización multiusuario.
